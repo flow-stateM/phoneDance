@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<style>
+    .box{
+        height: 300px;
+        margin-top: 50px;
+        margin-left: 5px;
+        margin-right: 5px;
+        /* border: 1px solid black; */
+        overflow: hidden;
+        font-size: 0;
+    }
+    .box div{
+        display: inline-block;
+        border-radius: 5px;
+        transform:translateY(50%);
+        /* transition: none; */
+    }
+    .box div.start{
+        transition:0.5s;
+    }
+    .box div img{
+        width: 100%;
+    }
+    body{
+        margin: 0;
+    }
+</style>
+<body>
+    <div class="box">
+        <div class="start"></div>
+        <div class="start"></div>[]
+        <div class="start"></div>
+        <div class="start"></div>
+        <div class="start"></div>
+        <div class="start"></div>
+        <div class="start"></div>
+    </div>
+</body>
+<!-- <script src="../../tool.js"></script> -->
+<script>
+    var box = document.querySelector('.box');
+    var items = document.querySelectorAll('.box div');
+    var len = items.length;
+    for(let i=0;i<len;i++){
+        // items[i].onmouseout =function(e){e.cancelBubble();console.log(1)}
+        items[i].style.width = 100/7 +'%';
+        items[i].innerHTML = `<img src="./${i+1}-${i+1}.png">`;
+    }
+    var timer=null,times,clientX=0;
+    //timer是动画帧函数的返回值  times是开始时间 clientX是鼠标的X坐标
+    function moveFn(e){
+        clientX = e.clientX;
+        cancelAnimationFrame(timer);
+        timer = requestAnimationFrame(animateFn);
+        for(var i=0;i<len;i++){
+            items[i].classList.remove('start');
+        }
+        times = new Date().valueOf();
+    };
+        var l  =box.offsetWidth/7*5;
+    function animateFn(e){
+        //获取当前时间
+		var timerNow = new Date().valueOf();
+        //想法 计算并改变transformY的值  根据鼠标距离每个div的中心X值的距离大小
+        for(var i =0;i<len;i++){
+        //每张图片中心X值距离屏幕
+            var middle = items[i].getBoundingClientRect().left+items[i].offsetWidth/2;
+        //鼠标到每个图片中心的距离
+            var distance = Math.abs(clientX-middle);
+			if( distance > l ) distance = l;
+        //计算横向距离与最大距离的比例 决定translateY的比例 （translateY的比例最高为60，阻止图片的位置太低）
+            var scale = (distance/l)*60;
+        //获取每张图片当前到顶部的值
+            var top =items[i].getBoundingClientRect().top-box.getBoundingClientRect().top;
+        //按照比例设置图片的translateY n是当前Y比例 o是要进行的差
+            var n = top/items[i].offsetHeight*100,
+                o = (scale-n)/5;
+                n +=o;
+                items[i].style.transform = `translateY(${n}%)`;
+                // console.log(n);
+        }
+        //判断是否结束  1秒
+        if(timerNow - times < 1000){
+			timer = requestAnimationFrame(animateFn);
+        }
+    }
+    function outFn(e){
+        cancelAnimationFrame(timer);
+        // console.log(1);
+        for(var i=0;i<len;i++){
+            items[i].classList.add('start');
+            items[i].style.transform ='';
+        }
+
+    }
+    box.onmousemove = moveFn;
+    box.addEventListener('mouseleave',outFn);
+</script>
+</html>
